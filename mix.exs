@@ -57,7 +57,15 @@ defmodule Exsimplefile.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:number, "~> 1.0"}
+
+      # Uploader SI unit formatting
+      {:number, "~> 1.0"},
+
+      # AWS S3 handling
+      {:ex_aws, "~> 2.5"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:hackney, "~> 1.24"},
+      {:sweet_xml, "~> 0.7"}
     ]
   end
 

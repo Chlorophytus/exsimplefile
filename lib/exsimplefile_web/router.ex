@@ -73,7 +73,6 @@ defmodule ExsimplefileWeb.Router do
 
     live_session :current_user,
       on_mount: [{ExsimplefileWeb.UserAuth, :mount_current_user}] do
-      live "/view", ViewLive, :create
     end
   end
 end

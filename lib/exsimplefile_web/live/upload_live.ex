@@ -50,9 +50,14 @@ defmodule ExsimplefileWeb.UploadLive do
       [path] =
         socket
         |> consume_uploaded_entries(:file, fn %{path: path}, entry ->
+          mime_type = MIME.from_path(entry.client_name)
+
           path
           |> ExAws.S3.Upload.stream_file()
-          |> ExAws.S3.upload(s3_bucket, entry.client_name)
+          |> ExAws.S3.upload(s3_bucket, entry.client_name, [
+            {:content_type, mime_type},
+            {:acl, :public_read}
+          ])
           |> ExAws.request!()
 
           {:ok, entry.client_name}

@@ -26,7 +26,13 @@ s3_bucket =
     environment variable S3_BUCKET is missing.
     """
 
-config :exsimplefile, :s3_bucket, s3_bucket
+cdn_location =
+  System.get_env("CDN_URI") ||
+    raise """
+    environment variable CDN_URI is missing.
+    """
+
+config :exsimplefile, s3_bucket: s3_bucket, cdn_uri: cdn_location
 
 config :ex_aws, region: System.get_env("AWS_REGION")
 

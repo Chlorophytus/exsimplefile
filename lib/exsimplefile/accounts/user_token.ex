@@ -8,7 +8,7 @@ defmodule Exsimplefile.Accounts.UserToken do
 
   # It is very important to keep the reset password token expiry short,
   # since someone with access to the email may take over the account.
-  @session_validity_in_days 60
+  @session_validity_in_days 1
 
   schema "users_tokens" do
     field :token, :binary

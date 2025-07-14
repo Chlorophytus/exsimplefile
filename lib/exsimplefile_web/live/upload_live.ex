@@ -15,6 +15,7 @@ defmodule ExsimplefileWeb.UploadLive do
         <.live_file_input class="text-center" upload={@uploads.file} />
       </form>
       <br />
+      <p class="text-center">{@upload_text}</p>
 
       <progress class="bg-zinc-100 rounded-full w-full m-4" max="100" value={@progress}></progress>
     </div>
@@ -29,6 +30,7 @@ defmodule ExsimplefileWeb.UploadLive do
     {:ok,
      socket
      |> assign(:uploaded_file, [])
+     |> assign(:upload_text, "")
      |> assign(:progress, 0)
      |> assign(:file_size, Number.SI.number_to_si(@file_size_raw, unit: "B", precision: 0))
      |> allow_upload(:file,
@@ -43,6 +45,7 @@ defmodule ExsimplefileWeb.UploadLive do
   defp handle_progress(:file, entry, socket) do
     if entry.done? do
       s3_bucket = Application.get_env(:exsimplefile, :s3_bucket)
+      cdn = Application.get_env(:exsimplefile, :cdn_uri)
 
       [path] =
         socket
@@ -57,7 +60,7 @@ defmodule ExsimplefileWeb.UploadLive do
 
       {:noreply,
        socket
-       |> put_flash(:info, "File uploaded as '#{path}'")}
+       |> assign(:upload_text, "File uploaded to #{URI.merge(cdn, path) |> to_string}")}
     else
       {:noreply, socket |> assign(:progress, entry.progress)}
     end

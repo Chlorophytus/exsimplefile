@@ -20,6 +20,16 @@ if System.get_env("PHX_SERVER") do
   config :exsimplefile, ExsimplefileWeb.Endpoint, server: true
 end
 
+s3_bucket =
+  System.get_env("S3_BUCKET") ||
+    raise """
+    environment variable S3_BUCKET is missing.
+    """
+
+config :exsimplefile, :s3_bucket, s3_bucket
+
+config :ex_aws, region: System.get_env("AWS_REGION")
+
 if config_env() == :prod do
   database_path =
     System.get_env("DATABASE_PATH") ||

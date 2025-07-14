@@ -11,22 +11,17 @@ defmodule ExsimplefileWeb.UploadLive do
       </.header>
       <p class="text-center">Maximum file size is {@file_size}</p>
       <br />
-      <form id="upload-form" class="text-center" phx-submit="upload-file" phx-change="validate">
+      <form id="upload-form" class="text-center" phx-change="validate">
         <.live_file_input class="text-center" upload={@uploads.file} />
       </form>
       <br />
 
-      <progress class="bg-zinc-100 rounded-full w-full m-4" max="100" value={@progress}>
-      </progress>
+      <progress class="bg-zinc-100 rounded-full w-full m-4" max="100" value={@progress}></progress>
     </div>
     """
   end
 
   def handle_event("validate", _unsigned_params, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_event("upload-file", _unsigned_params, socket) do
     {:noreply, socket}
   end
 
@@ -46,6 +41,25 @@ defmodule ExsimplefileWeb.UploadLive do
 
   # ===========================================================================
   defp handle_progress(:file, entry, socket) do
-    {:noreply, socket |> assign(:progress, entry.progress)}
+    if entry.done? do
+      s3_bucket = Application.get_env(:exsimplefile, :s3_bucket)
+
+      [path] =
+        socket
+        |> consume_uploaded_entries(:file, fn %{path: path}, entry ->
+          path
+          |> ExAws.S3.Upload.stream_file()
+          |> ExAws.S3.upload(s3_bucket, entry.client_name)
+          |> ExAws.request!()
+
+          {:ok, entry.client_name}
+        end)
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "File uploaded as '#{path}'")}
+    else
+      {:noreply, socket |> assign(:progress, entry.progress)}
+    end
   end
 end

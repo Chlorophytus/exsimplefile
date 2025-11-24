@@ -60,6 +60,9 @@ defmodule ExsimplefileWeb.UploadLive do
           ])
           |> ExAws.request!()
 
+          ExAws.S3.put_object_tagging(s3_bucket, entry.client_name, [{:uploader, socket.assigns[:current_user].username}])
+          |> ExAws.request!()
+
           {:ok, entry.client_name}
         end)
 

@@ -69,7 +69,7 @@ if config_env() == :prod do
     System.get_env("MAX_FILE_SIZE") ||
       raise """
       environment variable MAX_FILE_SIZE is missing.
-      Set it to a maximum file size in kilobytes
+      Set it to a maximum file size in bytes
       """
 
   config :exsimplefile, :max_file_size, max_file_size

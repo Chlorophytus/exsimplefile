@@ -1,8 +1,6 @@
 defmodule ExsimplefileWeb.UploadLive do
   use ExsimplefileWeb, :live_view
 
-  @file_size_raw 25 * 1000 * 1000
-
   def render(assigns) do
     ~H"""
     <div class="mx-auto max-w-sm">
@@ -27,15 +25,17 @@ defmodule ExsimplefileWeb.UploadLive do
   end
 
   def mount(_params, _session, socket) do
+    {:ok, file_size} = Application.fetch_env(:exsimplefile, :max_file_size)
+
     {:ok,
      socket
      |> assign(:uploaded_file, [])
      |> assign(:upload_text, "")
      |> assign(:progress, 0)
-     |> assign(:file_size, Number.SI.number_to_si(@file_size_raw, unit: "B", precision: 0))
+     |> assign(:file_size, Number.SI.number_to_si(file_size, unit: "B", precision: 0))
      |> allow_upload(:file,
        accept: :any,
-       max_file_size: @file_size_raw,
+       max_file_size: file_size,
        progress: &handle_progress/3,
        auto_upload: true
      )}
@@ -47,6 +47,9 @@ defmodule ExsimplefileWeb.UploadLive do
       s3_bucket = Application.get_env(:exsimplefile, :s3_bucket)
       cdn = Application.get_env(:exsimplefile, :cdn_uri)
 
+      username = socket.assigns[:current_user].username
+      calculated_path = Path.join(["~" <> username, entry.client_name])
+
       [path] =
         socket
         |> consume_uploaded_entries(:file, fn %{path: path}, entry ->
@@ -54,16 +57,18 @@ defmodule ExsimplefileWeb.UploadLive do
 
           path
           |> ExAws.S3.Upload.stream_file()
-          |> ExAws.S3.upload(s3_bucket, entry.client_name, [
+          |> ExAws.S3.upload(s3_bucket, calculated_path, [
             {:content_type, mime_type},
             {:acl, :public_read}
           ])
           |> ExAws.request!()
 
-          ExAws.S3.put_object_tagging(s3_bucket, entry.client_name, [{:uploader, socket.assigns[:current_user].username}])
+          ExAws.S3.put_object_tagging(s3_bucket, calculated_path, [
+            {:uploader, username}
+          ])
           |> ExAws.request!()
 
-          {:ok, entry.client_name}
+          {:ok, calculated_path}
         end)
 
       {:noreply,

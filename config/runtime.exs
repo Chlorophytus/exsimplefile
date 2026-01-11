@@ -65,6 +65,15 @@ if config_env() == :prod do
 
   config :exsimplefile, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
+  max_file_size =
+    System.get_env("MAX_FILE_SIZE") ||
+      raise """
+      environment variable MAX_FILE_SIZE is missing.
+      Set it to a maximum file size in kilobytes
+      """
+
+  config :exsimplefile, :max_file_size, max_file_size
+
   config :exsimplefile, ExsimplefileWeb.Endpoint,
     url: [host: host, port: port, scheme: "http"],
     http: [
@@ -72,7 +81,7 @@ if config_env() == :prod do
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.
       # See the documentation on https://hexdocs.pm/bandit/Bandit.html#t:options/0
       # for details about using IPv6 vs IPv4 and loopback vs public addresses.
-      ip: {0, 0, 0, 0, 0, 0, 0, 0},
+      ip: {0, 0, 0, 0, 0, 0, 0, 1},
       port: port
     ],
     secret_key_base: secret_key_base

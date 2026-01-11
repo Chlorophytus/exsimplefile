@@ -62,6 +62,8 @@ config :exsimplefile, ExsimplefileWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :exsimplefile, dev_routes: true
 
+config :exsimplefile, :max_file_size, 25 * 1000 * 1000
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
 

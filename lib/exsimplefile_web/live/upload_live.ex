@@ -25,7 +25,7 @@ defmodule ExsimplefileWeb.UploadLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, file_size} = Application.fetch_env(:exsimplefile, :max_file_size)
+    {file_size, _garbage} = Integer.parse(Application.fetch_env!(:exsimplefile, :max_file_size))
 
     {:ok,
      socket
